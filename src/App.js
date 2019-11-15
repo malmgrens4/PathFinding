@@ -1,6 +1,8 @@
 import React from 'react';
 import logo from './logo.svg';
 import './App.css';
+import { dijkstras }from './dijkstras/dijkstras'
+import { aStar } from './a_star/aStar'
 
 function App() {
   return (
@@ -16,8 +18,11 @@ function App() {
           target="_blank"
           rel="noopener noreferrer"
         >
-          Learn React
         </a>
+
+        <div>a</div>
+        <button onClick={() => dijkstras('c', 'e')}>Run Dijkstras</button>
+        <button onClick={() => aStar()}>Run A*</button>
       </header>
     </div>
   );
