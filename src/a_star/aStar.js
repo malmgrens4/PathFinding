@@ -14,6 +14,13 @@ export const aStar = () => {
             graph[i][j] = {x: j, y: i, isWall: false}
         }
     }
+
+    graph[0][1].isWall = true
+    graph[1][1].isWall = true
+    graph[2][1].isWall = true
+    graph[3][1].isWall = true
+    graph[4][1].isWall = true
+
     let startNode = graph[start.x][start.y]
     let goalNode = graph[goal.x][goal.y]
     let openList = [startNode]
@@ -21,33 +28,33 @@ export const aStar = () => {
     startNode.g = 0
     startNode.f = startNode.g + heuristic(startNode, goal)
     while (openList.length > 0){
-        //TODO thios has to return the index
+        //TODO this has to return the index
         let curNode = openList.reduce((min, node) => {return node.f < min.f ? node : min, openList[0]})
         if (curNode.x === goalNode.x && curNode.y === goalNode.y){
             console.log("Goal reached")
             printPath(curNode)
+            printGraph(graph)
         }
         let index = openList.indexOf(curNode)
         openList.splice(index, 1)
         visitedList.push(curNode)
         getNeighbors(curNode, graph).forEach(neighbor => {
-            if(!visitedList.includes(neighbor)){
-                neighbor.f = neighbor.g + heuristic(neighbor, goal)
-                if (!openList.includes(neighbor)){
-                    openList.push(neighbor)
-                }
-                else{
-                    // this is neighbor based off of its previous parent
-                    // TODO not sure how js will handle this
-                    let openNeighbor = openList[openList.indexOf(neighbor)]
-                    if(neighbor.g < openNeighbor.g) {
-                        openNeighbor.g = neighbor.g
-                        openNeighbor['parent'] = neighbor['parent']
+            if(!visitedList.includes(neighbor)) {
+                if (openList.includes(neighbor)) {
+                    if ((curNode.g + 1) < neighbor.g) {
+                        // the distance from this spot is
+                        // less than the previous one for this neighbor
+                        neighbor.g = curNode.g + 1
+                        neighbor.parent = curNode.parent
                     }
+                } else {
+                    neighbor.g = curNode.g + 1
+                    neighbor.f = neighbor.g + heuristic(curNode, neighbor)
+                    neighbor.parent = curNode
+                    openList.push(neighbor)
                 }
             }
         })
-
     }
     printGraph(graph)
 }
@@ -57,7 +64,7 @@ const printPath = (curNode) => {
     let path = ''
     let node = curNode
     while(node.hasOwnProperty('parent')){
-        path+=`|${node.x}, ${node.y}|`
+        path += `|${node.x}, ${node.y}|`
         node = node.parent
     }
     console.log(path)
@@ -71,14 +78,12 @@ const getNeighbors = (curNode, graph) => {
         if(!(curNode.x === 0 && i < 0) && !(curNode.x === graph.length - 1 && i > 0)){
         for (let j = -1; j <= 1; j++) {
             if (!(curNode.y === 0 && j < 0) && !(curNode.y === graph.length - 1 && j > 0)) {
-                if (i !== 0 || j !== 0) {
+                if (!(i === 0 && j === 0)) {
                     //If the grid is not a square the adjacent squares could cause a failure
                     try {
                         let neighbor = graph[curNode.x + i][curNode.y + j]
                         if (!neighbor.isWall) {
                             // the one would be replaced if weights were introduced
-                            neighbor.g = curNode.g + 1
-                            neighbor.parent = curNode
                             neighbors.push(neighbor)
                         }
                     } catch (err) {
@@ -103,7 +108,12 @@ const printGraph = (graph) => {
         let row = ''
         for (let j = 0; j < graph[i].length; j++) {
             let point = graph[i][j]
-            row += `| (${point.f}, ${point.g}) |`
+            if(point.isWall){
+                row+=`| ==WW== |`
+            }
+            else {
+                row += `| (${point.x}, ${point.y}) |`
+            }
         }
         g += row + '\n'
     }
