@@ -3,8 +3,8 @@
 
 
 export const aStar = () => {
-    let col = 5
-    let row = 5
+    let col = 6
+    let row = 6
     let graph = new Array(col)
     let start = {x: 0, y:0}
     let goal = {x: col - 1, y: row - 1}
@@ -14,12 +14,6 @@ export const aStar = () => {
             graph[i][j] = {x: j, y: i, isWall: false}
         }
     }
-
-    graph[0][1].isWall = true
-    graph[1][1].isWall = true
-    graph[2][1].isWall = true
-    graph[3][1].isWall = true
-    graph[4][1].isWall = true
 
     let startNode = graph[start.x][start.y]
     let goalNode = graph[goal.x][goal.y]
@@ -74,14 +68,14 @@ const printPath = (curNode) => {
 const getNeighbors = (curNode, graph) => {
     // check if at a natural boundary - then check if the
     let neighbors = []
-    for (let i = -1; i <= 1; i++) {
-        if(!(curNode.x === 0 && i < 0) && !(curNode.x === graph.length - 1 && i > 0)){
+    for (let i = -1; i <= 1; i++) {;
+        if(!(curNode.y === 0 && i < 0) && !(curNode.y === graph.length - 1 && i > 0)){
         for (let j = -1; j <= 1; j++) {
-            if (!(curNode.y === 0 && j < 0) && !(curNode.y === graph.length - 1 && j > 0)) {
+            if (!(curNode.x === 0 && j < 0) && !(curNode.x === graph[curNode.y + i].length - 1 && j > 0)) {
                 if (!(i === 0 && j === 0)) {
                     //If the grid is not a square the adjacent squares could cause a failure
                     try {
-                        let neighbor = graph[curNode.x + i][curNode.y + j]
+                        let neighbor = graph[curNode.y + i][curNode.x + j]
                         if (!neighbor.isWall) {
                             // the one would be replaced if weights were introduced
                             neighbors.push(neighbor)
@@ -111,6 +105,9 @@ const printGraph = (graph) => {
             if(point.isWall){
                 row+=`| ==WW== |`
             }
+            // if(point.isSelected){
+            //             //
+            //             // }
             else {
                 row += `| (${point.x}, ${point.y}) |`
             }
