@@ -4,6 +4,9 @@ const SET_UNWEIGHTED_GRAPH = 'SET_UNWEIGHTED_GRAPH'
 const SET_UNWEIGHTED_GRAPH_HISTORY = 'SET_UNWEIGHTED_GRAPH_HISTORY'
 const SET_UNWEIGHTED_GRAPH_NODE = 'SET_UNWEIGHTED_GRAPH_NODE'
 const SET_GRAPH_TYPE = 'SET_GRAPH_TYPE'
+const SET_IS_EDIT = 'SET_IS_EDIT'
+
+
 
 let col = 6
 let row = 6
@@ -33,6 +36,16 @@ export const graphType = (state = 'WEIGHTED', action) => {
     }
 }
 
+export const isEdit = (state = true, action ) => {
+    switch(action.type) {
+        case SET_IS_EDIT:
+            return action.isEdit
+
+        default:
+            return state
+    }
+}
+
 export const unweightedGraph = (state = unwGraph, action) => {
     switch(action.type) {
         case SET_UNWEIGHTED_GRAPH:
@@ -42,7 +55,7 @@ export const unweightedGraph = (state = unwGraph, action) => {
                 }
 
         case SET_UNWEIGHTED_GRAPH_NODE:
-            const newGraph = state.slice()
+            const newGraph = getDeepCopyGraph(state)
             newGraph[action.node.y][action.node.x] = action.node
             return newGraph
 
@@ -55,11 +68,7 @@ export const unweightedGraph = (state = unwGraph, action) => {
 export const unweightedGraphHistory = (state = [], action) => {
     switch(action.type) {
         case SET_UNWEIGHTED_GRAPH_HISTORY:
-            return {
-                    ...state,
-                    unweightedGraphHistory: action.unweightedGraphHistory
-                }
-
+            return action.unweightedGraphHistory
         default:
             return state
     }
@@ -97,3 +106,12 @@ export const weightedGraphHistory = (state = [], action) => {
     }
 }
 
+
+const getDeepCopyGraph = (graph) => {
+    return graph.slice().map(row => {
+        return row.slice().map(node => {
+            let target = JSON.parse(JSON.stringify(node))
+            return target
+        })
+    })
+}

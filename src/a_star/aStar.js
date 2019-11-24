@@ -1,19 +1,8 @@
+let graphHistory = []
 
-
-
-
-export const aStar = () => {
-    let col = 6
-    let row = 6
-    let graph = new Array(col)
-    let start = {x: 0, y:0}
-    let goal = {x: col - 1, y: row - 1}
-    for(let i = 0; i < col; i++){
-        graph[i] = new Array(row)
-        for (let j = 0; j < row; j++){
-            graph[i][j] = {x: j, y: i, isWall: false}
-        }
-    }
+export const aStar = (start, goal, origGraph) => {
+    graphHistory = []
+    let graph = getDeepCopyGraph(origGraph)
 
     let startNode = graph[start.x][start.y]
     let goalNode = graph[goal.x][goal.y]
@@ -21,18 +10,37 @@ export const aStar = () => {
     let visitedList = []
     startNode.g = 0
     startNode.f = startNode.g + heuristic(startNode, goal)
+
     while (openList.length > 0){
+        // clear states for graph history
+        for(let y = 0; y < graph.length; y++) {
+            for (let x = 0; x < graph[0].length; x++) {
+                let node = graph[y][x]
+                node.isCurrent = false
+                if(node.isNeighbor){
+                    node.isSelected = true
+                    node.isNeighbor = false
+                }
+            }
+        }
+
         //TODO this has to return the index
-        let curNode = openList.reduce((min, node) => {return node.f < min.f ? node : min, openList[0]})
-        if (curNode.x === goalNode.x && curNode.y === goalNode.y){
-            console.log("Goal reached")
-            printPath(curNode)
-            printGraph(graph)
+        let curNode = openList.reduce((min, node) => {return node.f < min.f ? node : min}, openList[0])
+        curNode['isCurrent'] = true
+        curNode['isVisited'] = true
+        if (curNode.x === goalNode.x && curNode.y === goalNode.y) {
+            alert("Goal reached")
+            setPath(curNode)
+            pushHistory(graph)
+            break
         }
         let index = openList.indexOf(curNode)
         openList.splice(index, 1)
         visitedList.push(curNode)
         getNeighbors(curNode, graph).forEach(neighbor => {
+
+            neighbor['isNeighbor'] = true
+
             if(!visitedList.includes(neighbor)) {
                 if (openList.includes(neighbor)) {
                     if ((curNode.g + 1) < neighbor.g) {
@@ -43,25 +51,42 @@ export const aStar = () => {
                     }
                 } else {
                     neighbor.g = curNode.g + 1
-                    neighbor.f = neighbor.g + heuristic(curNode, neighbor)
+                    neighbor.f = neighbor.g + heuristic(neighbor, goalNode)
                     neighbor.parent = curNode
                     openList.push(neighbor)
                 }
             }
         })
+
+        pushHistory(graph)
+
     }
-    printGraph(graph)
+    return graphHistory
+}
+
+const getDeepCopyGraph = (graph) => {
+    return graph.slice().map(row => {
+        return row.slice().map(node => {
+            let target = JSON.parse(JSON.stringify(node))
+            return target
+        })
+    })
+}
+
+const pushHistory = graph => {
+    let historyEntry = getDeepCopyGraph(graph)
+    graphHistory.push(historyEntry)
 }
 
 
-const printPath = (curNode) => {
+const setPath = (curNode) => {
     let path = ''
     let node = curNode
     while(node.hasOwnProperty('parent')){
         path += `|${node.x}, ${node.y}|`
         node = node.parent
+        node['isPath'] = true
     }
-    console.log(path)
     return path
 }
 
@@ -105,7 +130,7 @@ const printGraph = (graph) => {
             if(point.isWall){
                 row+=`| ==WW== |`
             }
-            // if(point.isSelected){
+            // if(point.isVisited){
             //             //
             //             // }
             else {

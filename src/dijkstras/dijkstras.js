@@ -45,9 +45,10 @@ export const dijkstras = (start, end) => {
 
         visitedNodes[minNode] = unvisitedNodes[minNode]
         delete unvisitedNodes[minNode]
+
     }
 
-    console.dir(predecessor)
+    return
 }
 
-dijkstras('c', 'e')
+
