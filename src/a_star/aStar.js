@@ -4,8 +4,8 @@ export const aStar = (start, goal, origGraph) => {
     graphHistory = []
     let graph = getDeepCopyGraph(origGraph)
 
-    let startNode = graph[start.x][start.y]
-    let goalNode = graph[goal.x][goal.y]
+    let startNode = graph[start.y][start.x]
+    let goalNode = graph[goal.y][goal.x]
     let openList = [startNode]
     let visitedList = []
     startNode.g = 0

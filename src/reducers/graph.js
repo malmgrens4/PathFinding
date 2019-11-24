@@ -8,8 +8,8 @@ const SET_IS_EDIT = 'SET_IS_EDIT'
 
 
 
-let col = 6
-let row = 6
+let col = 20
+let row = 20
 const unwGraph = new Array(col)
 let start = {x: 0, y:0}
 let goal = {x: col - 1, y: row - 1}
