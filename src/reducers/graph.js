@@ -1,3 +1,5 @@
+import {cloneDeep} from 'lodash';
+
 const SET_WEIGHTED_GRAPH = 'SET_UNWEIGHTED_GRAPH'
 const SET_WEIGHTED_GRAPH_HISTORY = 'SET_WEIGHTED_GRAPH_HISTORY'
 const SET_UNWEIGHTED_GRAPH = 'SET_UNWEIGHTED_GRAPH'
@@ -5,7 +7,6 @@ const SET_UNWEIGHTED_GRAPH_HISTORY = 'SET_UNWEIGHTED_GRAPH_HISTORY'
 const SET_UNWEIGHTED_GRAPH_NODE = 'SET_UNWEIGHTED_GRAPH_NODE'
 const SET_GRAPH_TYPE = 'SET_GRAPH_TYPE'
 const SET_IS_EDIT = 'SET_IS_EDIT'
-
 
 
 let col = 20
@@ -49,13 +50,9 @@ export const isEdit = (state = true, action ) => {
 export const unweightedGraph = (state = unwGraph, action) => {
     switch(action.type) {
         case SET_UNWEIGHTED_GRAPH:
-            return {
-                    ...state,
-                    unweightedGraph: action.unweightedGraph
-                }
-
+            return action.unweightedGraph
         case SET_UNWEIGHTED_GRAPH_NODE:
-            const newGraph = getDeepCopyGraph(state)
+            const newGraph = cloneDeep(state)
             newGraph[action.node.y][action.node.x] = action.node
             return newGraph
 
@@ -106,12 +103,3 @@ export const weightedGraphHistory = (state = [], action) => {
     }
 }
 
-
-const getDeepCopyGraph = (graph) => {
-    return graph.slice().map(row => {
-        return row.slice().map(node => {
-            let target = JSON.parse(JSON.stringify(node))
-            return target
-        })
-    })
-}
