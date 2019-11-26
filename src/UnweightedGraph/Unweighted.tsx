@@ -10,7 +10,7 @@ const NodeContainer = styled.div`
   flex-flow: column;
   flex-grow: 1;
 `
-const GraphNodeContainer = styled.div`
+const GraphNodeContainer = styled.rect`
   display: flex;
   flex-flow: column;
   flex-grow: 1;
@@ -51,16 +51,16 @@ const GraphNodeContainer = styled.div`
   }
 `
 
-const GraphRow = styled.div`
+const GraphRow = styled.svg`
   display: flex;
   flex-grow: 1;
 `
 
-const Graph = styled.div`
+const Graph = styled.svg`
   display: flex;
   flex-flow: column;
   width: 100%;
-  height: 100%;
+  height: 1000px;
 `
 
 type UnweightedGraphProps = {
@@ -75,6 +75,12 @@ type UnweightedGraphProps = {
 interface IGraphNode {
     node: any
     text: string
+    x: number,
+    y: number,
+    fill: string,
+    onClick: any,
+    onMouseDown: any
+    onDragEnter: any
 }
 
 class GraphNode extends React.Component<IGraphNode, IGraphNode> {
@@ -87,8 +93,16 @@ class GraphNode extends React.Component<IGraphNode, IGraphNode> {
         return(
             <GraphNodeContainer
                                 className={Object.keys(this.props.node).filter(key => this.props.node[key]).join(" ")}
-                                draggable>
-                {this.props.text}
+                                x={this.props.x}
+                                y={this.props.y}
+                                width={50}
+                                height={50}
+                                fill={this.props.fill}
+                                stroke={'green'}
+                                onClick={this.props.onClick}
+                                onMouseDown={this.props.onMouseDown}
+                                >
+
             </GraphNodeContainer>
         )
     }
@@ -104,6 +118,7 @@ const UnwGraphComponent = ({updateNode, setUnwGraphHistory, unwGraph,
     const [draggedNode, setDraggedNode] = useState()
     const [startNode, setStartNode] = useState({x: 0, y:0})
     const [goalNode, setGoalNode] = useState({x: 5, y: 5})
+    const [updateQueue, setUpdateQueue] = useState([])
 
     const updateDraggedNode = (node: any) => {
         const nodeClone = _.cloneDeep(node)
@@ -111,8 +126,9 @@ const UnwGraphComponent = ({updateNode, setUnwGraphHistory, unwGraph,
     }
 
     const toggleIsWall = (node: any) => {
-        let newNode = Object.assign({}, node)
+        let newNode = _.cloneDeep(node)
         newNode.isWall = !node.isWall
+        updateNode(newNode)
         return newNode
     }
 
@@ -124,8 +140,7 @@ const UnwGraphComponent = ({updateNode, setUnwGraphHistory, unwGraph,
     }
 
     const handleDragEnter = (node: any) => {
-        console.dir(draggedNode)
-        let newNode = _.cloneDeep(node)
+        let newNode = node
         if(!!draggedNode){
             if(draggedNode.isGoal) {
                 newNode['isGoal'] = true
@@ -142,7 +157,7 @@ const UnwGraphComponent = ({updateNode, setUnwGraphHistory, unwGraph,
                     }
                 }
             }
-            updateNode(newNode)
+            setUpdateQueue(updateQueue => updateQueue.concat(newNode))
         }
     }
 
@@ -156,7 +171,7 @@ const UnwGraphComponent = ({updateNode, setUnwGraphHistory, unwGraph,
                 newNode['isStart'] = false
             }
         }
-        updateNode(newNode)
+        setUpdateQueue(updateQueue => updateQueue.concat(newNode))
     }
 
     const handleDrop = (node: any) => {
@@ -175,8 +190,9 @@ const UnwGraphComponent = ({updateNode, setUnwGraphHistory, unwGraph,
                 newNode.isWall = false
                 setStartNode(newNode)
             }
-            updateNode(newNode)
-            updateNode(newDragged)
+            setUpdateQueue(updateQueue => updateQueue.concat(newNode))
+            setUpdateQueue(updateQueue => updateQueue.concat(newNode))
+
             setDraggedNode(undefined)
         }
     }
@@ -196,25 +212,20 @@ const UnwGraphComponent = ({updateNode, setUnwGraphHistory, unwGraph,
             <Graph>
                 {getCurrentGraph().map((row: any, i: number) => {
                     return (<GraphRow>
-                                {row.map((node: any) => {
+                                {row.map((node: any, j: number) => {
                                     return(
-                                        <NodeContainer onDragEnter={() => {handleDragEnter(node)}}
-                                                       onClick={() => updateNode(toggleIsWall(node))}
-                                                       onDragStart={() => {updateDraggedNode(node)}}
-                                                       onDragLeave={() => {handleDragLeave(node)}}
-                                                       onDrop={() => {handleDrop(node)}}
-                                                       onDragEnd={() => handleDragEnd(node)}
-                                                       onDragOver={handleDragOver}
-                                                       draggable
-                                        >
 
                                         <GraphNode
                                             node={node}
                                             text={`${node.x} ${node.y}`}
                                             key={`${node.x} ${node.y}`}
-                                            />
-                                        </NodeContainer>
-
+                                            x={node.x * 50}
+                                            y={node.y * 50}
+                                            fill={node.isStart ? 'green' : node.isGoal ? 'red' : node.isWall ? 'black' : 'white'}
+                                            onClick={() => {updateNode(toggleIsWall(node))}}
+                                            onMouseDown={() => setDraggedNode(node)}
+                                            onDragEnter={() => handleDragEnter(node)}
+                                        ></GraphNode>
                                     )
                                 })}
 
