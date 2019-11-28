@@ -2,6 +2,7 @@ import { combineReducers } from "redux"
 import { graphType, isEdit, unweightedGraph,
     unweightedGraphHistory, weightedGraph,
     weightedGraphHistory} from "./graph"
+import {historyIndex} from "./history";
 
 export default combineReducers({
     graphType,
@@ -9,5 +10,6 @@ export default combineReducers({
     unweightedGraph,
     unweightedGraphHistory,
     weightedGraph,
-    weightedGraphHistory
+    weightedGraphHistory,
+    historyIndex
 })

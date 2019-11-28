@@ -15,40 +15,48 @@ const GraphNodeContainer = styled.rect`
   flex-flow: column;
   flex-grow: 1;
   border: solid 1px black;
+  fill: whitesmoke;
+  stroke: black;
   & * {
     pointer-events: none;
   }
+  
+  
   &.isWall {
-    background-color: #282c34;
+    fill: #282c34;
   }
   
   &.isSelected {
-    background-color: lightblue;
+    fill: lightblue;
   }
   
   &.isStart {
-    background-color: forestgreen;
+    fill: forestgreen;
   }
   
   &.isNeighbor {
-    background-color: lightcoral;
+    fill: lightcoral;
   }
   
   &.isVisited {
-    background-color: dodgerblue; 
+    fill: dodgerblue; 
   }
   
   &.isCurrent {
-    background-color: orange;
+    fill: orange;
   }
   
   &.isGoal {
-    background-color: firebrick;
+    fill: firebrick;
   }
   
   &.isPath {
-    background-color: goldenrod;
+    fill: goldenrod;
   }
+  
+  transition: all .15s ease-in-out;
+  transform-origin: center;
+  
 `
 
 const GraphRow = styled.svg`
@@ -63,6 +71,41 @@ const Graph = styled.svg`
   height: 1000px;
 `
 
+
+
+type GraphNodeProps = {
+    node: any
+    text: string
+    x: number,
+    y: number,
+    onClick: any,
+    onMouseDown: any
+    onMouseUp: any
+    onMouseEnter: any
+    onMouseLeave: any
+}
+
+const GraphNode  = React.memo(function(props: GraphNodeProps) {
+
+    return(
+        <GraphNodeContainer
+                            className={Object.keys(props.node).filter(key => props.node[key]).join(" ")}
+                            x={props.x}
+                            y={props.y}
+                            width={50}
+                            height={50}
+                            onClick={props.onClick}
+                            onMouseDown={props.onMouseDown}
+                            onMouseUp={props.onMouseUp}
+                            onMouseEnter={props.onMouseEnter}
+                            onMouseLeave={props.onMouseLeave}
+                            >
+
+        </GraphNodeContainer>
+    )
+
+})
+
 type UnweightedGraphProps = {
     updateNode: (node: any) => void
     unwGraph: any
@@ -70,143 +113,128 @@ type UnweightedGraphProps = {
     isEdit: boolean
     setEdit: (isEdit: boolean) => void
     setUnwGraphHistory: (history: any[]) => void
+    historyIndex: number
 }
-
-interface IGraphNode {
-    node: any
-    text: string
-    x: number,
-    y: number,
-    fill: string,
-    onClick: any,
-    onMouseDown: any
-    onDragEnter: any
-}
-
-class GraphNode extends React.Component<IGraphNode, IGraphNode> {
-
-    shouldComponentUpdate(nextProps: Readonly<any>, nextState: Readonly<any>, nextContext: any): boolean {
-        return !_.isEqual(this.props.node, nextProps.node)
-    }
-
-    render() {
-        return(
-            <GraphNodeContainer
-                                className={Object.keys(this.props.node).filter(key => this.props.node[key]).join(" ")}
-                                x={this.props.x}
-                                y={this.props.y}
-                                width={50}
-                                height={50}
-                                fill={this.props.fill}
-                                stroke={'green'}
-                                onClick={this.props.onClick}
-                                onMouseDown={this.props.onMouseDown}
-                                >
-
-            </GraphNodeContainer>
-        )
-    }
-
-}
-
-
 
 const UnwGraphComponent = ({updateNode, setUnwGraphHistory, unwGraph,
-                               unwGraphHistory, isEdit, setEdit}: UnweightedGraphProps) => {
+                               unwGraphHistory, isEdit, setEdit, historyIndex}: UnweightedGraphProps) => {
 
-    const [index, setIndex] = useState(0)
     const [draggedNode, setDraggedNode] = useState()
     const [startNode, setStartNode] = useState({x: 0, y:0})
     const [goalNode, setGoalNode] = useState({x: 5, y: 5})
-    const [updateQueue, setUpdateQueue] = useState([])
+    const [mouseDown, setMouseDown] = useState(false)
+    const [nodeBelow, setNodeBelow] = useState()
 
-    const updateDraggedNode = (node: any) => {
-        const nodeClone = _.cloneDeep(node)
-        setDraggedNode(nodeClone)
+    const nodesSamePosition = (nodeA: any, nodeB: any) => {
+        return nodeA.x === nodeB.x && nodeA.y === nodeB.y
     }
 
     const toggleIsWall = (node: any) => {
-        let newNode = _.cloneDeep(node)
-        newNode.isWall = !node.isWall
-        updateNode(newNode)
-        return newNode
+        if (!nodesSamePosition(node, startNode) && !nodesSamePosition(node, goalNode)) {
+            let newNode = _.cloneDeep(node)
+            newNode.isWall = !node.isWall
+            updateNode(newNode)
+        }
     }
 
     const getCurrentGraph = () => {
         if(isEdit){
             return unwGraph
         }
-        return unwGraphHistory[index]
+        if(historyIndex < unwGraphHistory.length){
+            return unwGraphHistory[historyIndex]
+        }
+        else{
+            return unwGraphHistory[unwGraphHistory.length - 1]
+        }
+
     }
 
-    const handleDragEnter = (node: any) => {
-        let newNode = node
-        if(!!draggedNode){
-            if(draggedNode.isGoal) {
-                newNode['isGoal'] = true
+    const handleMouseOver = (node: any) => {
+        if(!!draggedNode && mouseDown){
+            setNodeBelow(node)
+            let newNode = _.cloneDeep(node)
+            if(draggedNode.isGoal && !newNode.isStart) {
+                newNode.isGoal = true
+                updateNode(newNode)
             }
             else {
-                if (draggedNode.isStart) {
+                if (draggedNode.isStart && !newNode.isGoal) {
                     newNode['isStart'] = true
+                    updateNode(newNode)
                 }
                 else {
                     if (draggedNode.isWall || !draggedNode.isWall) {
                         if(!newNode.isGoal && !newNode.isStart) {
                             newNode.isWall = !draggedNode.isWall
+                            updateNode(newNode)
                         }
                     }
                 }
             }
-            setUpdateQueue(updateQueue => updateQueue.concat(newNode))
+
         }
     }
 
-    const handleDragLeave = (node: any) => {
-        let newNode = _.cloneDeep(node)
-        if(!!draggedNode){
-            if(draggedNode.isGoal) {
-                newNode['isGoal'] = false
-            }
-            else if(draggedNode.isStart) {
-                newNode['isStart'] = false
-            }
-        }
-        setUpdateQueue(updateQueue => updateQueue.concat(newNode))
-    }
-
-    const handleDrop = (node: any) => {
+    const handleMouseUp = (node: any) => {
         if(!!draggedNode) {
             let newNode = _.cloneDeep(node)
             let newDragged = _.cloneDeep(draggedNode)
-            if (newDragged.isGoal) {
+            if (draggedNode.isGoal) {
                 newDragged.isGoal = false
                 newNode.isGoal = true
                 newNode.isWall = false
+                if(newNode.isStart) {
+                    //Node is overwritten by the goal before this shows up. So prevent overwriting in the mouseOver logic.
+                    newDragged.isStart = true
+                    newNode.isStart = false
+                    setStartNode(newDragged)
+                }
                 setGoalNode(newNode)
+                updateNode(newDragged)
+                updateNode(newNode)
             }
             if (draggedNode.isStart) {
                 newDragged.isStart = false
                 newNode.isStart = true
                 newNode.isWall = false
+                if(newNode.isGoal) {
+                    newDragged.isGoal = true
+                    newNode.isGoal = false
+                    setGoalNode(newDragged)
+                }
                 setStartNode(newNode)
+                updateNode(newDragged)
+                updateNode(newNode)
             }
-            setUpdateQueue(updateQueue => updateQueue.concat(newNode))
-            setUpdateQueue(updateQueue => updateQueue.concat(newNode))
-
             setDraggedNode(undefined)
         }
     }
 
-    const handleDragOver = (event: any) => {
-        event.stopPropagation();
-        event.preventDefault();
+    const handleMouseLeave = (node: any) => {
+        if(!!draggedNode && mouseDown){
+            let newNode = _.cloneDeep(node)
+
+            if(draggedNode.isGoal) {
+                newNode['isGoal'] = false
+                updateNode(newNode)
+            }
+            else {
+                if(draggedNode.isStart) {
+                    newNode['isStart'] = false
+                    updateNode(newNode)
+                }
+                else {
+                    if(node === draggedNode){
+                        newNode.isWall = !draggedNode.isWall
+                    }
+                }
+            }
+            updateNode(newNode)
+        }
     }
 
-    const handleDragEnd = (node: any) => {
-        let newNode = _.cloneDeep(node)
-        return
-    }
-
+    // need to be able to update the walls only once per node. Mouse Over will execute too many times.
     return (
         <>
             <Graph>
@@ -214,17 +242,17 @@ const UnwGraphComponent = ({updateNode, setUnwGraphHistory, unwGraph,
                     return (<GraphRow>
                                 {row.map((node: any, j: number) => {
                                     return(
-
                                         <GraphNode
                                             node={node}
                                             text={`${node.x} ${node.y}`}
                                             key={`${node.x} ${node.y}`}
                                             x={node.x * 50}
                                             y={node.y * 50}
-                                            fill={node.isStart ? 'green' : node.isGoal ? 'red' : node.isWall ? 'black' : 'white'}
-                                            onClick={() => {updateNode(toggleIsWall(node))}}
-                                            onMouseDown={() => setDraggedNode(node)}
-                                            onDragEnter={() => handleDragEnter(node)}
+                                            onClick={() => {toggleIsWall(node)}}
+                                            onMouseDown={() => {setMouseDown(true); setDraggedNode(node);}}
+                                            onMouseUp={() => {handleMouseUp(node)}}
+                                            onMouseEnter={() => handleMouseOver(node)}
+                                            onMouseLeave={() => handleMouseLeave(node)}
                                         ></GraphNode>
                                     )
                                 })}
@@ -232,11 +260,12 @@ const UnwGraphComponent = ({updateNode, setUnwGraphHistory, unwGraph,
                             </GraphRow>)
                 })}
             </Graph>
-            <div>{index}</div>
-            <button onClick={() => setIndex(index - 1)}>Step Back</button>
-            <button onClick={() => setIndex(index + 1)}>Step Forward</button>
+            <div>{historyIndex}</div>
             <button onClick={() => setUnwGraphHistory(aStar(startNode, goalNode, unwGraph))}>Generate History</button>
             <button onClick={() => setEdit(!isEdit)}>Toggle Edit</button>
+            <div> {mouseDown ? 'mouse down': 'mouse up'} </div>
+            {draggedNode && <div> {`${draggedNode.isWall} ${draggedNode.x} ${draggedNode.y}` }</div>}
+            {nodeBelow && <div> {`${nodeBelow.isWall} ${nodeBelow.x} ${nodeBelow.y} ${nodeBelow.isGoal ? 'goal' : 'n'} ${nodeBelow.isStart ? 'start' : 'n'}` }</div>}
         </>
     )
 }
@@ -245,7 +274,8 @@ const mapStateToProps = (state: any) => {
     return {
         unwGraph: state.unweightedGraph,
         unwGraphHistory: state.unweightedGraphHistory,
-        isEdit: state.isEdit
+        isEdit: state.isEdit,
+        historyIndex: state.historyIndex
     }
 }
 

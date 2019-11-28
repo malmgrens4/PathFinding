@@ -41,4 +41,10 @@ export const setWeightedGraphHistory = (weightedGraphHistory: any) => ({
     weightedGraphHistory
 })
 
+export const setHistoryIndex = (historyIndex: number) => ({
+    type: "SET_HISTORY_INDEX",
+    historyIndex
+})
+
+
 

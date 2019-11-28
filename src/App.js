@@ -7,13 +7,13 @@ import { UnwGraph } from './UnweightedGraph/Unweighted'
 import  { Provider } from 'react-redux'
 import { createStore }from 'redux'
 import rootReducer from './reducers'
+import {GraphControls} from "./GraphControls/GraphControls";
 
 function App() {
   return (
       <div className="App">
           <UnwGraph/>
-          <button onClick={() => dijkstras('c', 'e')}>Run Dijkstras</button>
-          <button onClick={() => aStar()}>Run A*</button>
+          <GraphControls/>
       </div>
   );
 }
