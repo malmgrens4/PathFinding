@@ -1,11 +1,23 @@
 let graphHistory = []
 
-export const aStar = (start, goal, origGraph) => {
+export const aStar = (graph) => {
     graphHistory = []
-    let graph = getDeepCopyGraph(origGraph)
-
-    let startNode = graph[start.y][start.x]
-    let goalNode = graph[goal.y][goal.x]
+    let startNode = {}
+    let goalNode = {}
+    for(let y = 0; y < graph.length; y++){
+        for(let x = 0; x < graph[y].length; x++){
+            if(graph[y][x].isStart){
+                startNode = graph[y][x]
+            }
+            if(graph[y][x].isGoal){
+                goalNode = graph[y][x]
+            }
+        }
+    }
+    if(!startNode || !goalNode){
+        console.log("Need a start and goal node.")
+        return
+    }
     let openList = [startNode]
     let visitedList = []
     startNode.g = 0
@@ -62,15 +74,6 @@ export const aStar = (start, goal, origGraph) => {
 
     }
     return graphHistory
-}
-
-const getDeepCopyGraph = (graph) => {
-    return graph.slice().map(row => {
-        return row.slice().map(node => {
-            let target = JSON.parse(JSON.stringify(node))
-            return target
-        })
-    })
 }
 
 const pushHistory = graph => {

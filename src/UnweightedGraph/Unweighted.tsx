@@ -21,7 +21,6 @@ const GraphNodeContainer = styled.rect`
     pointer-events: none;
   }
   
-  
   &.isWall {
     fill: #282c34;
   }
@@ -54,7 +53,7 @@ const GraphNodeContainer = styled.rect`
     fill: goldenrod;
   }
   
-  transition: all .15s ease-in-out;
+  transition: all .25s ease-in-out;
   transform-origin: center;
   
 `
@@ -112,11 +111,10 @@ type UnweightedGraphProps = {
     unwGraphHistory: any
     isEdit: boolean
     setEdit: (isEdit: boolean) => void
-    setUnwGraphHistory: (history: any[]) => void
     historyIndex: number
 }
 
-const UnwGraphComponent = ({updateNode, setUnwGraphHistory, unwGraph,
+const UnwGraphComponent = ({updateNode, unwGraph,
                                unwGraphHistory, isEdit, setEdit, historyIndex}: UnweightedGraphProps) => {
 
     const [draggedNode, setDraggedNode] = useState()
@@ -258,11 +256,11 @@ const UnwGraphComponent = ({updateNode, setUnwGraphHistory, unwGraph,
                                 })}
 
                             </GraphRow>)
+
                 })}
             </Graph>
             <div>{historyIndex}</div>
-            <button onClick={() => setUnwGraphHistory(aStar(startNode, goalNode, unwGraph))}>Generate History</button>
-            <button onClick={() => setEdit(!isEdit)}>Toggle Edit</button>
+
             <div> {mouseDown ? 'mouse down': 'mouse up'} </div>
             {draggedNode && <div> {`${draggedNode.isWall} ${draggedNode.x} ${draggedNode.y}` }</div>}
             {nodeBelow && <div> {`${nodeBelow.isWall} ${nodeBelow.x} ${nodeBelow.y} ${nodeBelow.isGoal ? 'goal' : 'n'} ${nodeBelow.isStart ? 'start' : 'n'}` }</div>}
@@ -285,12 +283,7 @@ const mapDispatchToProps = (dispatch: any) => {
         updateNode: (node: any) => {
             dispatch(setUnweightedGraphNode(node))
         },
-        setEdit: (isEdit: boolean) => {
-            dispatch(setIsEdit(isEdit))
-        },
-        setUnwGraphHistory: (graphHistory: any) => {
-            dispatch(setUnweightedGraphHistory(graphHistory))
-        }
+
     }
 }
 
