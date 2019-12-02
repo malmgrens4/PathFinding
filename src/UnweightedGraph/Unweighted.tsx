@@ -1,9 +1,9 @@
 import React, {useState} from 'react'
 import styled from 'styled-components'
 import { connect } from 'react-redux'
-import {setIsEdit, setUnweightedGraphHistory, setUnweightedGraphNode} from "../actions";
-import {aStar} from "../a_star/aStar";
+import { setUnweightedGraphNode } from "../actions";
 import _ from 'lodash'
+import ReactResizeDetector from "react-resize-detector";
 
 const NodeContainer = styled.div`
   display: flex;
@@ -53,7 +53,7 @@ const GraphNodeContainer = styled.rect`
     fill: goldenrod;
   }
   
-  transition: all .25s ease-in-out;
+  transition: all .15s ease-in-out;
   transform-origin: center;
   
 `
@@ -67,13 +67,15 @@ const Graph = styled.svg`
   display: flex;
   flex-flow: column;
   width: 100%;
-  height: 1000px;
+  height: 100%;
 `
 
 
 
 type GraphNodeProps = {
     node: any
+    nodeWidth: number,
+    nodeHeight: number,
     text: string
     x: number,
     y: number,
@@ -91,8 +93,8 @@ const GraphNode  = React.memo(function(props: GraphNodeProps) {
                             className={Object.keys(props.node).filter(key => props.node[key]).join(" ")}
                             x={props.x}
                             y={props.y}
-                            width={50}
-                            height={50}
+                            width={props.nodeWidth}
+                            height={props.nodeHeight}
                             onClick={props.onClick}
                             onMouseDown={props.onMouseDown}
                             onMouseUp={props.onMouseUp}
@@ -110,18 +112,19 @@ type UnweightedGraphProps = {
     unwGraph: any
     unwGraphHistory: any
     isEdit: boolean
-    setEdit: (isEdit: boolean) => void
     historyIndex: number
 }
 
 const UnwGraphComponent = ({updateNode, unwGraph,
-                               unwGraphHistory, isEdit, setEdit, historyIndex}: UnweightedGraphProps) => {
+                               unwGraphHistory, isEdit, historyIndex}: UnweightedGraphProps) => {
 
     const [draggedNode, setDraggedNode] = useState()
     const [startNode, setStartNode] = useState({x: 0, y:0})
     const [goalNode, setGoalNode] = useState({x: 5, y: 5})
     const [mouseDown, setMouseDown] = useState(false)
     const [nodeBelow, setNodeBelow] = useState()
+    const [nodeDimension, setNodeDimension] = useState(50)
+
 
     const nodesSamePosition = (nodeA: any, nodeB: any) => {
         return nodeA.x === nodeB.x && nodeA.y === nodeB.y
@@ -232,39 +235,52 @@ const UnwGraphComponent = ({updateNode, unwGraph,
         }
     }
 
+
+    const updateNodeDimensions = (width: number, height: number) => {
+        if(!!unwGraph) {
+            if(unwGraph.length > 0 ) {
+                setNodeDimension(width / unwGraph[0].length)
+            }
+        }
+    }
     // need to be able to update the walls only once per node. Mouse Over will execute too many times.
     return (
-        <>
-            <Graph>
-                {getCurrentGraph().map((row: any, i: number) => {
-                    return (<GraphRow>
-                                {row.map((node: any, j: number) => {
-                                    return(
-                                        <GraphNode
-                                            node={node}
-                                            text={`${node.x} ${node.y}`}
-                                            key={`${node.x} ${node.y}`}
-                                            x={node.x * 50}
-                                            y={node.y * 50}
-                                            onClick={() => {toggleIsWall(node)}}
-                                            onMouseDown={() => {setMouseDown(true); setDraggedNode(node);}}
-                                            onMouseUp={() => {handleMouseUp(node)}}
-                                            onMouseEnter={() => handleMouseOver(node)}
-                                            onMouseLeave={() => handleMouseLeave(node)}
-                                        ></GraphNode>
-                                    )
-                                })}
+        <div style={{width: '100%', height: '1000px'}}>
+            <ReactResizeDetector handleWidth handleHeight onResize={updateNodeDimensions}>
+                <Graph>
+                    {getCurrentGraph().map((row: any, i: number) => {
+                        return (<GraphRow>
+                                    {row.map((node: any, j: number) => {
+                                        return(
+                                            <GraphNode
+                                                node={node}
+                                                text={`${node.x} ${node.y}`}
+                                                key={`${node.x} ${node.y}`}
+                                                x={node.x * nodeDimension}
+                                                y={node.y * nodeDimension}
+                                                nodeWidth={nodeDimension}
+                                                nodeHeight={nodeDimension}
+                                                onClick={() => {toggleIsWall(node)}}
+                                                onMouseDown={() => {setMouseDown(true); setDraggedNode(node);}}
+                                                onMouseUp={() => {handleMouseUp(node)}}
+                                                onMouseEnter={() => handleMouseOver(node)}
+                                                onMouseLeave={() => handleMouseLeave(node)}
+                                            ></GraphNode>
+                                        )
+                                    })}
 
-                            </GraphRow>)
+                                </GraphRow>)
 
-                })}
-            </Graph>
+                    })}
+                </Graph>
+
+            </ReactResizeDetector>
             <div>{historyIndex}</div>
 
             <div> {mouseDown ? 'mouse down': 'mouse up'} </div>
             {draggedNode && <div> {`${draggedNode.isWall} ${draggedNode.x} ${draggedNode.y}` }</div>}
             {nodeBelow && <div> {`${nodeBelow.isWall} ${nodeBelow.x} ${nodeBelow.y} ${nodeBelow.isGoal ? 'goal' : 'n'} ${nodeBelow.isStart ? 'start' : 'n'}` }</div>}
-        </>
+        </div>
     )
 }
 

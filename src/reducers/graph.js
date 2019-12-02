@@ -9,11 +9,11 @@ const SET_GRAPH_TYPE = 'SET_GRAPH_TYPE'
 const SET_IS_EDIT = 'SET_IS_EDIT'
 
 
-let col = 15
-let row = 15
+let col = 11
+let row = 23
 const unwGraph = new Array(col)
-let start = {x: 0, y:0}
-let goal = {x: col - 1, y: row - 1}
+let start = {x: Math.floor(row/2 - 1), y: Math.floor(col/2 )}
+let goal = {x: Math.floor(row/2 + 1), y: Math.floor(col/2)}
 for(let i = 0; i < col; i++){
     unwGraph[i] = new Array(row)
     for (let j = 0; j < row; j++){
@@ -21,8 +21,8 @@ for(let i = 0; i < col; i++){
     }
 }
 
-unwGraph[start.x][start.y].isStart = true
-unwGraph[goal.x][goal.y].isGoal = true
+unwGraph[start.y][start.x].isStart = true
+unwGraph[goal.y][goal.x].isGoal = true
 
 export const graphType = (state = 'WEIGHTED', action) => {
     switch(action.type) {

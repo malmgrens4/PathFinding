@@ -6,7 +6,7 @@ import Draggable from 'react-draggable';
 
 const theme = {
     primaryColor: "blue",
-    secondaryColor: "rgba(0, 50, 255, .5)",
+    secondaryColor: "rgba(0, 0, 0, .2)",
     minSpacing: '.8em',
     maxSpacing: '2em',
 }
@@ -31,7 +31,7 @@ export const HomeScreen = () => {
         <GridContainer>
             <UnwGraph/>
         </GridContainer>
-        <Draggable>
+        <Draggable handle=".handle" >
             <ControlsContainer>
                 <GraphControls/>
             </ControlsContainer>

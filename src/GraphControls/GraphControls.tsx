@@ -9,6 +9,12 @@ import InputLabel from '@material-ui/core/InputLabel';
 import Paper from "@material-ui/core/Paper";
 import Typography from "@material-ui/core/Typography";
 import {aStar} from "../a_star/aStar";
+import PlayArrowIcon from '@material-ui/icons/PlayArrow';
+import SkipPreviousIcon from '@material-ui/icons/SkipPrevious';
+import SkipNextIcon from '@material-ui/icons/SkipNext';
+import PauseIcon from '@material-ui/icons/Pause';
+import ReplayIcon from '@material-ui/icons/Replay';
+import Button from "@material-ui/core/Button";
 
 const GraphControlsContainer = styled(Paper)`
   display: flex;
@@ -17,22 +23,78 @@ const GraphControlsContainer = styled(Paper)`
   &.MuiPaper-root {
     background-color: ${props => props.theme.secondaryColor} !important;
   }
+  .handle{
+    background-color: white;
+  }
+  .handle:hover {
+    cursor: move;
+  }
 `
 
 const ControlContainer = styled.div`
   display: flex;
+  flex-flow: column;
+  justify-content: center;
+  align-content: center;
+`
+
+const ControlSubsection = styled.div`
+  display: flex;
+  flex-flow: column;
+  align-self: center;
+  justify-self: center;
+  padding: ${props => props.theme.minSpacing};
+`
+
+const ControlSubTitle = styled.h3`
+  color: ${props => props.theme.primaryColor};
+`
+
+const PlayOptions = styled.div`
+  display: flex;
   flex-flow: row wrap;
+  justify-self: center;
+  align-self: center;
 `
 
 type GraphControlsProps = {
     index: number
     setIndex: (index: number) => void
     isEdit: boolean
+    setEdit: (edit: boolean) => void
+    unwGraph: any
+    unwGraphHistory: any
+    setUnwGraphHistory: (graphHistory: any) => void
 }
 
-const GraphControlsComponent = ({index, setIndex, isEdit}: GraphControlsProps) => {
+const GraphControlsComponent = ({index, setIndex, isEdit, setEdit, unwGraph, unwGraphHistory, setUnwGraphHistory}: GraphControlsProps) => {
     const [playback, setPlayback] = useState(100)
     const [isPlayback, setIsPlayback] = useState(true)
+    const [algo, setAlgo] = useState("A*")
+    const algoMap: any = {"A*": aStar}
+
+    const playbackRates = [
+        {
+            label: 'Super Fast',
+            value: '50',
+        },
+        {
+            label: 'Pretty Fast',
+            value: '100',
+        },
+        {
+            label: 'Not Fast, But Not Slow Either',
+            value: '500',
+        },
+        {
+            label: 'Take It Easy',
+            value: '1000',
+        },
+    ];
+
+    const iconOptions: { [key: string]: string; } = {
+        fontSize: "large"
+    }
 
     const togglePlaybackMode = () => {
         setIndex(0)
@@ -41,41 +103,94 @@ const GraphControlsComponent = ({index, setIndex, isEdit}: GraphControlsProps) =
 
     useEffect(() => {
         const timer = setTimeout(() => {
-            if(!isEdit && isPlayback) {
-                setIndex(index + 1)
+            if(index == unwGraphHistory.length){
+                setIsPlayback(false)
+            }
+            if(!isEdit && isPlayback && index < unwGraphHistory.length) {
+                updateGraphIndex(1)
             }
         }, playback);
-
-
         return () => clearTimeout(timer);
     })
 
+    const updateGraphIndex = (increment: any) => {
+        const maxIndex = unwGraphHistory.length
+        setIndex(Math.max(0, Math.min(increment + index, maxIndex)))
+    }
 
+    const playClick = () => {
+        if(isEdit) {
+            setIndex(0)
+            setUnwGraphHistory(algoMap[algo](unwGraph))
+        }
+        setEdit(false)
+        setIsPlayback(true)
+    }
+
+    const pauseClick = () => {
+        setIsPlayback(false)
+    }
+
+    const skipBackClick = () => {
+        setIsPlayback(false)
+        updateGraphIndex(-1)
+    }
+
+    const skipForwardClick = () => {
+        setIsPlayback(false)
+        updateGraphIndex(1)
+    }
     // effect to reset index whenever history changes
 
+    const updateEditMode = () => {
+        setIndex(0)
+        setEdit(true)
+    }
+
+    const clearWalls = () => {
+
+    }
 
     return (
         <GraphControlsContainer>
-            <Typography>Controls</Typography>
-            <div>{`Current index: ${index}`}</div>
+            <Typography className="handle">Controls</Typography>
+            <div>{`Step: ${index}/${unwGraphHistory.length}`}</div>
             <ControlContainer>
-
-                <button onClick={() => setIndex(index - 1)}>-1</button>
-                <button onClick={() => setIndex(index + 1)}>+1</button>
-                <input onChange={(event) => setPlayback(parseInt(event.target.value))} value={playback} type="number"></input>
-                <button onClick={togglePlaybackMode}>Toggle Playback {`${isPlayback}`}</button>
-                <button onClick={() => setUnwGraphHistory(aStar(unwGraph))}>Generate History</button>
-                <button onClick={() => setEdit(!isEdit)}>Toggle Edit</button>
-            </ControlContainer>
-            <FormControl>
-                <InputLabel>Algorithm</InputLabel>
+                {/*{TODO set playback to off when mnaually incremented}*/}
+            <ControlSubsection>
+                <ControlSubTitle>Play</ControlSubTitle>
+                <PlayOptions>
+                    <SkipPreviousIcon {...iconOptions} onClick={skipBackClick}/>
+                    {(!isPlayback || isEdit) ? <PlayArrowIcon {...iconOptions} onClick={playClick}/> : <PauseIcon {...iconOptions} onClick={pauseClick}/>}
+                    <SkipNextIcon {...iconOptions} onClick={skipForwardClick}/>
+                </PlayOptions>
+                <PlayOptions>
+                    <Button onClick={updateEditMode}>Edit Mode</Button>
+                    <Button onClick={clearWalls}>Clear Walls</Button>
+                </PlayOptions>
+            </ControlSubsection>
+            <ControlSubsection>
                 <Select
-                    value={"A*"}
-                    onChange={(event: any) => {console.log(event.target.value)}}
-                >
-                    <MenuItem value="A*">A*</MenuItem>
+                    value={playback}
+                    onChange={(event: any) => {setPlayback(event.target.value)}}>
+                    {playbackRates.map((opt: any) => {
+                        return <MenuItem value={opt.value}>{opt.label}</MenuItem>
+                    })}
                 </Select>
-            </FormControl>
+                <input onChange={(event) => setPlayback(parseInt(event.target.value))} value={playback} type="number"></input>
+            </ControlSubsection>
+            </ControlContainer>
+            <ControlSubsection>
+                <FormControl>
+                    <InputLabel>Algorithm</InputLabel>
+                    <Select
+                        value={algo}
+                        onChange={(event: any) => {setAlgo(event.target.value)}}
+                    >
+                        <MenuItem value="A*">A*</MenuItem>
+                    </Select>
+                </FormControl>
+            </ControlSubsection>
         </GraphControlsContainer>
     )
 
@@ -83,9 +198,10 @@ const GraphControlsComponent = ({index, setIndex, isEdit}: GraphControlsProps) =
 
 const mapStateToProps = (state: any) => {
     return {
-        index: state.historyIndex,
         isEdit: state.isEdit,
-        historyIndex: state.historyIndex
+        index: state.historyIndex,
+        unwGraph: state.unweightedGraph,
+        unwGraphHistory: state.unweightedGraphHistory,
     }
 }
 

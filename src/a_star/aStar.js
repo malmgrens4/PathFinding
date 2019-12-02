@@ -1,6 +1,11 @@
+import {cloneDeep} from 'lodash';
+import {connect} from "react-redux";
+import {setHistoryIndex, setIsEdit, setUnweightedGraphHistory} from "../actions";
+
 let graphHistory = []
 
-export const aStar = (graph) => {
+export const aStar = (_graph) => {
+    let graph = cloneDeep(_graph)
     graphHistory = []
     let startNode = {}
     let goalNode = {}
@@ -21,7 +26,7 @@ export const aStar = (graph) => {
     let openList = [startNode]
     let visitedList = []
     startNode.g = 0
-    startNode.f = startNode.g + heuristic(startNode, goal)
+    startNode.f = startNode.g + heuristic(startNode, goalNode)
 
     while (openList.length > 0){
         // clear states for graph history
@@ -41,7 +46,7 @@ export const aStar = (graph) => {
         curNode['isCurrent'] = true
         curNode['isVisited'] = true
         if (curNode.x === goalNode.x && curNode.y === goalNode.y) {
-            alert("Goal reached")
+            console.log("Goal reached")
             setPath(curNode)
             pushHistory(graph)
             break
@@ -69,15 +74,15 @@ export const aStar = (graph) => {
                 }
             }
         })
-
+        console.log("add history")
         pushHistory(graph)
-
     }
+    console.dir(graphHistory)
     return graphHistory
 }
 
 const pushHistory = graph => {
-    let historyEntry = getDeepCopyGraph(graph)
+    let historyEntry = cloneDeep(graph)
     graphHistory.push(historyEntry)
 }
 
