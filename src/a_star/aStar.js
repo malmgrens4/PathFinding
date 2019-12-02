@@ -64,7 +64,7 @@ export const aStar = (_graph) => {
                         // the distance from this spot is
                         // less than the previous one for this neighbor
                         neighbor.g = curNode.g + 1
-                        neighbor.parent = curNode.parent
+                        neighbor.parent = curNode
                     }
                 } else {
                     neighbor.g = curNode.g + 1
@@ -74,10 +74,10 @@ export const aStar = (_graph) => {
                 }
             }
         })
-        console.log("add history")
+        setPath(curNode)
         pushHistory(graph)
+        clearPath(curNode)
     }
-    console.dir(graphHistory)
     return graphHistory
 }
 
@@ -87,13 +87,22 @@ const pushHistory = graph => {
 }
 
 
-const setPath = (curNode) => {
+const setPath = (node) => {
     let path = ''
-    let node = curNode
     while(node.hasOwnProperty('parent')){
         path += `|${node.x}, ${node.y}|`
         node = node.parent
         node['isPath'] = true
+    }
+    return path
+}
+
+const clearPath = (node) => {
+    let path = ''
+    while(node.hasOwnProperty('parent')){
+        path += `|${node.x}, ${node.y}|`
+        node = node.parent
+        node['isPath'] = false
     }
     return path
 }
