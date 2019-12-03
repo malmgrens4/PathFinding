@@ -177,7 +177,6 @@ const GraphControlsComponent = ({index, setIndex, isEdit, setEdit, unwGraph, unw
                         return <MenuItem value={opt.value}>{opt.label}</MenuItem>
                     })}
                 </Select>
-                <input onChange={(event) => setPlayback(parseInt(event.target.value))} value={playback} type="number"></input>
             </ControlSubsection>
             </ControlContainer>
             <ControlSubsection>

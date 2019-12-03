@@ -4,6 +4,7 @@ import { connect } from 'react-redux'
 import { setUnweightedGraphNode } from "../actions";
 import _ from 'lodash'
 import ReactResizeDetector from "react-resize-detector";
+import {cloneDeep} from "@babel/types";
 
 const NodeContainer = styled.div`
   display: flex;
@@ -151,25 +152,25 @@ const UnwGraphComponent = ({updateNode, unwGraph,
 
     }
 
-    const handleMouseOver = (node: any) => {
+    const handleMouseEnter = (node: any) => {
         if(!!draggedNode && mouseDown){
-            setNodeBelow(node)
             let newNode = _.cloneDeep(node)
             if(draggedNode.isGoal && !newNode.isStart) {
+                setNodeBelow(node)
                 newNode.isGoal = true
                 updateNode(newNode)
             }
             else {
                 if (draggedNode.isStart && !newNode.isGoal) {
+                    setNodeBelow(node)
                     newNode['isStart'] = true
                     updateNode(newNode)
                 }
                 else {
-                    if (draggedNode.isWall || !draggedNode.isWall) {
-                        if(!newNode.isGoal && !newNode.isStart) {
-                            newNode.isWall = !draggedNode.isWall
-                            updateNode(newNode)
-                        }
+                    if(!newNode.isGoal && !newNode.isStart) {
+                        setNodeBelow(node)
+                        newNode.isWall = !draggedNode.isWall
+                        updateNode(newNode)
                     }
                 }
             }
@@ -181,6 +182,7 @@ const UnwGraphComponent = ({updateNode, unwGraph,
         if(!!draggedNode) {
             let newNode = _.cloneDeep(node)
             let newDragged = _.cloneDeep(draggedNode)
+
             if (draggedNode.isGoal) {
                 newDragged.isGoal = false
                 newNode.isGoal = true
@@ -235,6 +237,12 @@ const UnwGraphComponent = ({updateNode, unwGraph,
         }
     }
 
+    const handleMouseDown = (node: any) => {
+        if(!draggedNode) {
+            setMouseDown(true);
+            setDraggedNode(node);
+        }
+    }
 
     const updateNodeDimensions = (width: number, height: number) => {
         if(!!unwGraph) {
@@ -243,11 +251,14 @@ const UnwGraphComponent = ({updateNode, unwGraph,
             }
         }
     }
+
+    const handleMouseLeaveGrid = () => {
+    }
     // need to be able to update the walls only once per node. Mouse Over will execute too many times.
     return (
         <div style={{width: '100%', height: '1000px'}}>
             <ReactResizeDetector handleWidth handleHeight onResize={updateNodeDimensions}>
-                <Graph>
+                <Graph onMouseLeave={handleMouseLeaveGrid}>
                     {getCurrentGraph().map((row: any, i: number) => {
                         return (<GraphRow>
                                     {row.map((node: any, j: number) => {
@@ -261,9 +272,9 @@ const UnwGraphComponent = ({updateNode, unwGraph,
                                                 nodeWidth={nodeDimension}
                                                 nodeHeight={nodeDimension}
                                                 onClick={() => {toggleIsWall(node)}}
-                                                onMouseDown={() => {setMouseDown(true); setDraggedNode(node);}}
+                                                onMouseDown={() => {handleMouseDown(node)}}
                                                 onMouseUp={() => {handleMouseUp(node)}}
-                                                onMouseEnter={() => handleMouseOver(node)}
+                                                onMouseEnter={() => handleMouseEnter(node)}
                                                 onMouseLeave={() => handleMouseLeave(node)}
                                             ></GraphNode>
                                         )

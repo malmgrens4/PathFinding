@@ -46,9 +46,6 @@ export const aStar = (_graph) => {
         curNode['isCurrent'] = true
         curNode['isVisited'] = true
         if (curNode.x === goalNode.x && curNode.y === goalNode.y) {
-            console.log("Goal reached")
-            setPath(curNode)
-            pushHistory(graph)
             break
         }
         let index = openList.indexOf(curNode)
