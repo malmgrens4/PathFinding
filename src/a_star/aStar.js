@@ -1,6 +1,4 @@
 import {cloneDeep} from 'lodash';
-import {connect} from "react-redux";
-import {setHistoryIndex, setIsEdit, setUnweightedGraphHistory} from "../actions";
 
 let graphHistory = []
 
@@ -132,29 +130,6 @@ const getNeighbors = (curNode, graph) => {
 
 const heuristic = (start, goal) => {
     return Math.pow((goal.x - start.x), 2) + Math.pow((goal.y - start.y), 2)
-}
-
-
-const printGraph = (graph) => {
-    let g = ''
-    for(let i = 0; i < graph.length; i++){
-        let row = ''
-        for (let j = 0; j < graph[i].length; j++) {
-            let point = graph[i][j]
-            if(point.isWall){
-                row+=`| ==WW== |`
-            }
-            // if(point.isVisited){
-            //             //
-            //             // }
-            else {
-                row += `| (${point.x}, ${point.y}) |`
-            }
-        }
-        g += row + '\n'
-    }
-    console.log(g)
-    return g
 }
 
 

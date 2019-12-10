@@ -30,16 +30,16 @@ const GraphNodeContainer = styled.rect`
     fill: lightblue;
   }
   
-  &.isStart {
-    fill: forestgreen;
-  }
-  
   &.isNeighbor {
     fill: lightcoral;
   }
   
   &.isVisited {
     fill: dodgerblue; 
+  }
+  
+  &.isStart {
+    fill: forestgreen;
   }
   
   &.isCurrent {
@@ -188,7 +188,6 @@ const UnwGraphComponent = ({updateNode, unwGraph,
                 newNode.isGoal = true
                 newNode.isWall = false
                 if(newNode.isStart) {
-                    //Node is overwritten by the goal before this shows up. So prevent overwriting in the mouseOver logic.
                     newDragged.isStart = true
                     newNode.isStart = false
                     setStartNode(newDragged)
@@ -252,45 +251,48 @@ const UnwGraphComponent = ({updateNode, unwGraph,
         }
     }
 
-    const handleMouseLeaveGrid = () => {
-    }
-    // need to be able to update the walls only once per node. Mouse Over will execute too many times.
     return (
         <div style={{width: '100%', height: '1000px'}}>
             <ReactResizeDetector handleWidth handleHeight onResize={updateNodeDimensions}>
-                <Graph onMouseLeave={handleMouseLeaveGrid}>
-                    {getCurrentGraph().map((row: any, i: number) => {
+                <Graph>
+                    {getCurrentGraph().map((row: any) => {
                         return (<GraphRow>
-                                    {row.map((node: any, j: number) => {
-                                        return(
-                                            <GraphNode
-                                                node={node}
-                                                text={`${node.x} ${node.y}`}
-                                                key={`${node.x} ${node.y}`}
-                                                x={node.x * nodeDimension}
-                                                y={node.y * nodeDimension}
-                                                nodeWidth={nodeDimension}
-                                                nodeHeight={nodeDimension}
-                                                onClick={() => {toggleIsWall(node)}}
-                                                onMouseDown={() => {handleMouseDown(node)}}
-                                                onMouseUp={() => {handleMouseUp(node)}}
-                                                onMouseEnter={() => handleMouseEnter(node)}
-                                                onMouseLeave={() => handleMouseLeave(node)}
-                                            ></GraphNode>
-                                        )
+                                    {row.map((node: any) => {
+                                            return isEdit ?
+                                                <GraphNode
+                                                    node={node}
+                                                    text={`${node.x} ${node.y}`}
+                                                    key={`${node.x} ${node.y}`}
+                                                    x={node.x * nodeDimension}
+                                                    y={node.y * nodeDimension}
+                                                    nodeWidth={nodeDimension}
+                                                    nodeHeight={nodeDimension}
+                                                    onClick={() => {
+                                                        toggleIsWall(node)
+                                                    }}
+                                                    onMouseDown={() => {
+                                                        handleMouseDown(node)
+                                                    }}
+                                                    onMouseUp={() => {
+                                                        handleMouseUp(node)
+                                                    }}
+                                                    onMouseEnter={() => handleMouseEnter(node)}
+                                                    onMouseLeave={() => handleMouseLeave(node)}
+                                                ></GraphNode>
+                                                : <GraphNodeContainer
+                                                        className={Object.keys(node).filter(key => node[key]).join(" ")}
+                                                        x={node.x * nodeDimension}
+                                                        y={node.y * nodeDimension}
+                                                        width={nodeDimension}
+                                                        height={nodeDimension}
+                                                ></GraphNodeContainer>
+                                        })
                                     })}
-
                                 </GraphRow>)
 
                     })}
                 </Graph>
-
             </ReactResizeDetector>
-            <div>{historyIndex}</div>
-
-            <div> {mouseDown ? 'mouse down': 'mouse up'} </div>
-            {draggedNode && <div> {`${draggedNode.isWall} ${draggedNode.x} ${draggedNode.y}` }</div>}
-            {nodeBelow && <div> {`${nodeBelow.isWall} ${nodeBelow.x} ${nodeBelow.y} ${nodeBelow.isGoal ? 'goal' : 'n'} ${nodeBelow.isStart ? 'start' : 'n'}` }</div>}
         </div>
     )
 }

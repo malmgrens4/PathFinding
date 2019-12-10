@@ -1,7 +1,8 @@
 import React, {useEffect, useState} from 'react'
 import styled, {ThemeProvider} from 'styled-components'
 import { UnwGraph } from '../UnweightedGraph/Unweighted'
-import {GraphControls} from "../GraphControls/GraphControls";
+import { GraphControls } from "../GraphControls/GraphControls";
+import { Collapse } from '../Collapsible/Collapse';
 import Draggable from 'react-draggable';
 
 const theme = {
@@ -18,22 +19,28 @@ const GridContainer = styled.div`
 
 const ControlsContainer = styled.div`
   position: absolute;
-  right: 0;
+  right: 10%;
   top: 0;
-  width: 25%;
   background-color: ${props => props.theme.secondaryColor};
 `
 
+const BodyStyle = styled.div`
+  overflow: hidden;
+`
+
 export const HomeScreen = () => {
+    const [controlsOpen, setControlsOpen] = useState<boolean>(true)
 
     return (
         <ThemeProvider theme={theme}>
-        <GridContainer>
+        <GridContainer onMouseDown={event => setControlsOpen(false)} onMouseUp={event => setControlsOpen(true)}>
             <UnwGraph/>
         </GridContainer>
         <Draggable handle=".handle" >
             <ControlsContainer>
-                <GraphControls/>
+                <Collapse>
+                    <GraphControls controlsOpen={controlsOpen}/>
+                </Collapse>
             </ControlsContainer>
         </Draggable>
         </ThemeProvider>
