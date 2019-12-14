@@ -1,8 +1,11 @@
 const SET_UNWEIGHTED_GRAPH = 'SET_UNWEIGHTED_GRAPH'
-const SET_WEIGHTED_GRAPH = 'SET_UNWEIGHTED_GRAPH'
-const SET_WEIGHTED_GRAPH_HISTORY = 'SET_WEIGHTED_GRAPH_HISTORY'
 const SET_UNWEIGHTED_GRAPH_HISTORY = 'SET_UNWEIGHTED_GRAPH_HISTORY'
 const SET_UNWEIGHTED_GRAPH_NODE = 'SET_UNWEIGHTED_GRAPH_NODE'
+
+const SET_WEIGHTED_GRAPH = 'SET_UNWEIGHTED_GRAPH'
+const SET_WEIGHTED_GRAPH_NODE = 'SET_WEIGHTED_GRAPH_NODE'
+const SET_WEIGHTED_GRAPH_HISTORY = 'SET_WEIGHTED_GRAPH_HISTORY'
+
 const SET_GRAPH_TYPE = 'SET_GRAPH_TYPE'
 const SET_IS_EDIT = 'SET_IS_EDIT'
 
@@ -39,6 +42,11 @@ export const setWeightedGraph = (weightedGraph: any) => ({
 export const setWeightedGraphHistory = (weightedGraphHistory: any) => ({
     type: SET_WEIGHTED_GRAPH_HISTORY,
     weightedGraphHistory
+})
+
+export const setWeightedGraphNode = (node: any) => ({
+    type: SET_WEIGHTED_GRAPH_NODE,
+    node
 })
 
 export const setHistoryIndex = (historyIndex: number) => ({

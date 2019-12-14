@@ -1,7 +1,10 @@
 import {cloneDeep} from 'lodash';
+import {WGraphNeighbor, WGraphNode, WGraphI} from "../Graphs/GraphTypes";
 
 const SET_WEIGHTED_GRAPH = 'SET_UNWEIGHTED_GRAPH'
 const SET_WEIGHTED_GRAPH_HISTORY = 'SET_WEIGHTED_GRAPH_HISTORY'
+const SET_WEIGHTED_GRAPH_NODE = 'SET_WEIGHTED_GRAPH_NODE'
+
 const SET_UNWEIGHTED_GRAPH = 'SET_UNWEIGHTED_GRAPH'
 const SET_UNWEIGHTED_GRAPH_HISTORY = 'SET_UNWEIGHTED_GRAPH_HISTORY'
 const SET_UNWEIGHTED_GRAPH_NODE = 'SET_UNWEIGHTED_GRAPH_NODE'
@@ -24,11 +27,11 @@ for(let i = 0; i < col; i++){
 unwGraph[start.y][start.x].isStart = true
 unwGraph[goal.y][goal.x].isGoal = true
 
-export const graphType = (state = 'WEIGHTED', action) => {
+
+export const graphType = (state = 'WEIGHTED', action: any) => {
     switch(action.type) {
         case SET_GRAPH_TYPE:
             return {
-                    ...state,
                     graphType: action.graphType
                 }
 
@@ -37,7 +40,7 @@ export const graphType = (state = 'WEIGHTED', action) => {
     }
 }
 
-export const isEdit = (state = true, action ) => {
+export const isEdit = (state = true, action: any ) => {
     switch(action.type) {
         case SET_IS_EDIT:
             return action.isEdit
@@ -47,7 +50,7 @@ export const isEdit = (state = true, action ) => {
     }
 }
 
-export const unweightedGraph = (state = unwGraph, action) => {
+export const unweightedGraph = (state = unwGraph, action: any) => {
     switch(action.type) {
         case SET_UNWEIGHTED_GRAPH:
             return action.unweightedGraph
@@ -62,7 +65,7 @@ export const unweightedGraph = (state = unwGraph, action) => {
     }
 }
 
-export const unweightedGraphHistory = (state = [], action) => {
+export const unweightedGraphHistory = (state = [], action: any) => {
     switch(action.type) {
         case SET_UNWEIGHTED_GRAPH_HISTORY:
             return action.unweightedGraphHistory
@@ -71,33 +74,60 @@ export const unweightedGraphHistory = (state = [], action) => {
     }
 }
 
-let wGraph = {
-    a: {neighbors: { b: {weight: 3}, c: {weight: 1}}},
-    b: {neighbors: { c: {weight: 7}, d: {weight: 5}, e: {weight: 1}}},
-    c: {neighbors: { a: {weight: 1}, d: {weight: 2}}},
-    d: {neighbors: { e: {weight: 7}}},
-    e: {neighbors: {}}
+
+let wGraph: WGraphI = {}
+
+for (let i = 0; i < 4; i++){
+    let neighbors: Record<string, WGraphNeighbor> = {}
+
+    let id = String.fromCharCode(i + 65)
+
+    let newNode: WGraphNode = {
+        id,
+        isStart: false,
+        isGoal: false,
+        isVisited: false,
+        isCurrent: false,
+        isNeighbor: false,
+        neighbors,
+        parent: null
+    }
+    wGraph[id] = newNode
 }
 
-export const weightedGraph = (state = wGraph, action) => {
+// for (let i = 0; i < 6; i++) {
+//     let neighbors: Record<string, WGraphNeighbor> = {}
+//
+//     for (let j = 0; j < 6; j++) {
+//         let ids: string[] = Object.keys(wGraph);
+//         neighbors[wGraph[ids[j]].id] = {node: wGraph[ids[j]], weight: (Math.random() * 10) + 1}
+//     }
+// }
+
+wGraph["A"].neighbors = {"B": {node: wGraph["B"], weight: 3}}
+wGraph["A"].neighbors = {"C": {node: wGraph["C"], weight: 7}}
+
+wGraph["B"].neighbors = {"C": {node: wGraph["C"], weight: 2}}
+wGraph["B"].neighbors = {"D": {node: wGraph["D"], weight: 3}}
+
+wGraph["C"].neighbors = {"D": {node: wGraph["D"], weight: 1}}
+wGraph["C"].neighbors = {"B": {node: wGraph["B"], weight: 1}}
+
+export const weightedGraph = (state = wGraph, action: any) => {
     switch(action.type) {
         case SET_WEIGHTED_GRAPH:
-            return {
-                    ...state,
-                    weightedGraph: action.weightedGraph
-                }
+            return action.weightedGraph
+        case SET_WEIGHTED_GRAPH_NODE:
+            return state
         default:
             return state
     }
 }
 
-export const weightedGraphHistory = (state = [], action) => {
+export const weightedGraphHistory = (state = [], action: any) => {
     switch(action.type) {
         case SET_WEIGHTED_GRAPH_HISTORY:
-            return {
-                    ...state,
-                    weightedGraphHistory: action.weightedGraphHistory
-                }
+            return action.weightedGraphHistory
         default:
             return state
     }

@@ -11,6 +11,7 @@ const NodeContainer = styled.div`
   flex-flow: column;
   flex-grow: 1;
 `
+
 const GraphNodeContainer = styled.rect`
   display: flex;
   flex-flow: column;

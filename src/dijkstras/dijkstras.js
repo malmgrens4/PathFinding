@@ -1,17 +1,43 @@
+import {cloneDeep} from 'lodash';
 
+export const dijkstras = (nodes) => {
+    let wGraph = {}
 
+    for (let i = 0; i < 4; i++){
+        let neighbors = {};
+        // if(i != 0) {
+        //     for (let j = 0; j < i; j++) {
+        //         let ids= Object.keys(wGraph);
+        //         neighbors[wGraph[ids[j]].id] = {node: wGraph[ids[j]], weight: (Math.random() * 10) + 1}
+        //     }
+        // }
+        let id = String.fromCharCode(i + 65)
+        let newNode = {
+            id,
+            isStart: false,
+            isGoal: false,
+            isVisited: false,
+            isCurrent: false,
+            isNeighbor: false,
+            neighbors,
+            parent: null
+        }
 
-export const dijkstras = (start, end) => {
+        wGraph[id] = newNode
+    }
 
-    let nodes = {
-        a: {neighbors: { b: {weight: 3}, c: {weight: 1}}},
-        b: {neighbors: { c: {weight: 7}, d: {weight: 5}, e: {weight: 1}}},
-        c: {neighbors: { a: {weight: 1}, d: {weight: 2}}},
-        d: {neighbors: { e: {weight: 7}}},
-        e: {neighbors: {}}
-    };
+    wGraph["A"].neighbors["B"] = {node: wGraph["B"], weight: 3}
+    wGraph["A"].neighbors["C"] = {node: wGraph["C"], weight: 7}
 
-    let unvisitedNodes = nodes
+    wGraph["B"].neighbors["C"] = {node: wGraph["C"], weight: 1}
+    wGraph["B"].neighbors["D"] = {node: wGraph["D"], weight: 3}
+
+    wGraph["C"].neighbors["D"] = {node: wGraph["D"], weight: 1}
+    wGraph["C"].neighbors["B"] = {node: wGraph["B"], weight: 1}
+    
+    let start = 'A'
+
+    let unvisitedNodes = cloneDeep(wGraph)
     // holds array of nodes visited
     let visitedNodes = {}
     // holds the current minimum distance to a given point
@@ -40,6 +66,7 @@ export const dijkstras = (start, end) => {
                 minDistance[neighbor] = distanceToPoint
                 evaluated.push({from: minNode, to: neighbor})
                 predecessor[neighbor] = minNode
+                unvisitedNodes[minNode].neighbors[neighbor].parent = minNode
             }
         })
 
@@ -47,7 +74,8 @@ export const dijkstras = (start, end) => {
         delete unvisitedNodes[minNode]
 
     }
-
+    console.log(evaluated)
+    console.log(predecessor)
     return
 }
 

@@ -4,6 +4,10 @@ import { UnwGraph } from '../UnweightedGraph/Unweighted'
 import { GraphControls } from "../GraphControls/GraphControls";
 import { Collapse } from '../Collapsible/Collapse';
 import Draggable from 'react-draggable';
+import {dijkstras} from "../dijkstras/dijkstras";
+import {connect} from "react-redux";
+import {GraphType} from "../Graphs/GraphTypes";
+import {WGraph} from "../WeightedGraph/WeightedGraph";
 
 const theme = {
     primaryColor: "blue",
@@ -28,13 +32,18 @@ const BodyStyle = styled.div`
   overflow: hidden;
 `
 
-export const HomeScreen = () => {
+type HomeProps = {
+    graphType: GraphType
+}
+
+const Home = ({graphType}: HomeProps) => {
     const [controlsOpen, setControlsOpen] = useState<boolean>(true)
 
     return (
         <ThemeProvider theme={theme}>
-        <GridContainer onMouseDown={event => setControlsOpen(false)} onMouseUp={event => setControlsOpen(true)}>
-            <UnwGraph/>
+        <GridContainer>
+            <button onClick={dijkstras}>RUN DIH</button>
+            {graphType === 'WEIGHTED' ? <WGraph/> : <UnwGraph/>}
         </GridContainer>
         <Draggable handle=".handle" >
             <ControlsContainer>
@@ -46,3 +55,15 @@ export const HomeScreen = () => {
         </ThemeProvider>
     )
 }
+
+const mapStateToProps = (state: any) => {
+    return {
+        graphType: state.graphType
+    }
+}
+
+
+export const HomeScreen = connect(
+    mapStateToProps,
+    null
+)(Home)
