@@ -28,7 +28,7 @@ unwGraph[start.y][start.x].isStart = true
 unwGraph[goal.y][goal.x].isGoal = true
 
 
-export const graphType = (state = 'WEIGHTED', action: any) => {
+export const graphType = (state = 'UNWEIGHTED', action: any) => {
     switch(action.type) {
         case SET_GRAPH_TYPE:
             return {
@@ -116,7 +116,7 @@ wGraph["C"].neighbors = {"B": {node: wGraph["B"], weight: 1}}
 export const weightedGraph = (state = wGraph, action: any) => {
     switch(action.type) {
         case SET_WEIGHTED_GRAPH:
-            return action.weightedGraph
+            return state
         case SET_WEIGHTED_GRAPH_NODE:
             return state
         default:

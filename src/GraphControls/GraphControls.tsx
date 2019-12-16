@@ -14,6 +14,7 @@ import InputLabel from '@material-ui/core/InputLabel';
 import Paper from "@material-ui/core/Paper";
 import Typography from "@material-ui/core/Typography";
 import {aStar} from "../a_star/aStar";
+import {bfs} from "../bfs/bfs";
 import PlayArrowIcon from '@material-ui/icons/PlayArrow';
 import SkipPreviousIcon from '@material-ui/icons/SkipPrevious';
 import SkipNextIcon from '@material-ui/icons/SkipNext';
@@ -118,7 +119,10 @@ const GraphControlsComponent = ({controlsOpen, index, setIndex, isEdit, setEdit,
     const [isPlayback, setIsPlayback] = useState(true)
 
     const [algo, setAlgo] = useState("A*")
-    const algoMap: any = {"A*": aStar}
+    const algoMap: any = {
+                            "A*": aStar,
+                            "Breadth First Search": bfs
+                          }
 
     const playbackRates = [
         {
@@ -221,7 +225,10 @@ const GraphControlsComponent = ({controlsOpen, index, setIndex, isEdit, setEdit,
                                         setAlgo(event.target.value)
                                     }}
                                 >
-                                    <MenuItem value="A*">A*</MenuItem>
+                                    {Object.keys(algoMap).map(algo => {
+                                        return (<MenuItem value={algo}>{algo}</MenuItem>)
+                                    })}
+
                                 </Select>
                             </FormControl>
                         </ControlSubsection>

@@ -42,7 +42,6 @@ const Home = ({graphType}: HomeProps) => {
     return (
         <ThemeProvider theme={theme}>
         <GridContainer>
-            <button onClick={dijkstras}>RUN DIH</button>
             {graphType === 'WEIGHTED' ? <WGraph/> : <UnwGraph/>}
         </GridContainer>
         <Draggable handle=".handle" >
