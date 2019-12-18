@@ -1,8 +1,8 @@
-import {cloneDeep} from 'lodash';
+import {cloneDeep} from 'lodash'
 
 let graphHistory = []
 
-export const bfs = (_graph) => {
+export const dfs = (_graph) => {
     const graph = cloneDeep(_graph)
     graphHistory = []
     let startNode = {}
@@ -26,7 +26,7 @@ export const bfs = (_graph) => {
     let goalFound = false
 
     while(queue.length > 0){
-        const node = queue.shift()
+        const node = queue.pop()
         node['isVisited'] = true
         node['isCurrent'] = true
         getNeighbors(node, graph).map(neighbor => {
@@ -58,6 +58,7 @@ export const bfs = (_graph) => {
     }
     return graphHistory
 }
+
 
 const pushHistory = graph => {
     let historyEntry = cloneDeep(graph)
@@ -110,3 +111,4 @@ const getNeighbors = (curNode, graph) => {
     }
     return neighbors
 }
+

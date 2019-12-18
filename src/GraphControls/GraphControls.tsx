@@ -15,6 +15,7 @@ import Paper from "@material-ui/core/Paper";
 import Typography from "@material-ui/core/Typography";
 import {aStar} from "../a_star/aStar";
 import {bfs} from "../bfs/bfs";
+import {dfs} from "../dfs/dfs";
 import PlayArrowIcon from '@material-ui/icons/PlayArrow';
 import SkipPreviousIcon from '@material-ui/icons/SkipPrevious';
 import SkipNextIcon from '@material-ui/icons/SkipNext';
@@ -22,6 +23,7 @@ import PauseIcon from '@material-ui/icons/Pause';
 import Button from "@material-ui/core/Button";
 import Collapsible from 'react-collapsible';
 import {cloneDeep} from "lodash";
+import {bestFirstSearch} from "../bestFirstSearch/bestFirstSearch";
 
 
 const GraphControlsContainer = styled(Paper)`
@@ -121,7 +123,9 @@ const GraphControlsComponent = ({controlsOpen, index, setIndex, isEdit, setEdit,
     const [algo, setAlgo] = useState("A*")
     const algoMap: any = {
                             "A*": aStar,
-                            "Breadth First Search": bfs
+                            "Breadth First Search": bfs,
+                            "Depth First Search": dfs,
+                            "Best First Search": bestFirstSearch
                           }
 
     const playbackRates = [

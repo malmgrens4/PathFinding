@@ -2,7 +2,47 @@ import {cloneDeep} from 'lodash';
 
 let graphHistory = []
 
-export const bfs = (_graph) => {
+class QItem {
+    constructor(element, priority) {
+        this.element = element
+        this.priority = priority
+    }
+}
+
+class PriorityQueue {
+    constructor()
+    {
+        this.items = []
+    }
+
+    queue(element){
+        let added = false
+        for(let i = 0; i < this.items.length; i++){
+            if(element.priority < this.items[i].priority) {
+                this.items.splice(i, 0, element);
+                added = true
+                break
+            }
+        }
+        if(!added){
+            this.items.push(element)
+        }
+    }
+
+    pop(){
+        let element = this.items.shift()
+        if(!!element){
+            return element.element
+        }
+        return undefined
+    }
+
+    length() {
+        return this.items.length
+    }
+}
+
+export const bestFirstSearch = (_graph) => {
     const graph = cloneDeep(_graph)
     graphHistory = []
     let startNode = {}
@@ -22,11 +62,12 @@ export const bfs = (_graph) => {
         return
     }
 
-    let queue = [startNode]
+    let queue = new PriorityQueue()
+    queue.queue({element: startNode, priority: 0})
     let goalFound = false
 
-    while(queue.length > 0){
-        const node = queue.shift()
+    while(queue.length() > 0){
+        const node = queue.pop()
         node['isVisited'] = true
         node['isCurrent'] = true
         getNeighbors(node, graph).map(neighbor => {
@@ -43,9 +84,9 @@ export const bfs = (_graph) => {
                 neighbor['parent'] = node
 
                 neighbor['isVisited'] = true
-                queue.push(neighbor)
+                let scoredNeighbor = new QItem(neighbor, heuristic(neighbor, goalNode))
+                queue.queue(scoredNeighbor)
             }
-
 
         })
 
@@ -59,19 +100,10 @@ export const bfs = (_graph) => {
     return graphHistory
 }
 
+
 const pushHistory = graph => {
     let historyEntry = cloneDeep(graph)
     graphHistory.push(historyEntry)
-}
-
-const clearPath = (node) => {
-    let path = ''
-    while(node.hasOwnProperty('parent')){
-        path += `|${node.x}, ${node.y}|`
-        node = node.parent
-        node['isPath'] = false
-    }
-    return path
 }
 
 const setPath = (node) => {
@@ -81,7 +113,6 @@ const setPath = (node) => {
         node = node.parent
         node['isPath'] = true
     }
-    console.log(path)
     return path
 }
 
@@ -109,4 +140,8 @@ const getNeighbors = (curNode, graph) => {
         }
     }
     return neighbors
+}
+
+const heuristic = (start, goal) => {
+    return Math.pow((goal.x - start.x), 2) + Math.pow((goal.y - start.y), 2)
 }
