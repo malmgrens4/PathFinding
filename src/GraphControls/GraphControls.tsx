@@ -169,7 +169,7 @@ const GraphControlsComponent = ({controlsOpen, index, setIndex, isEdit, setEdit,
     }
 
     const initHistoryMode = () => {
-        if(isEdit) {
+        if(isEdit || index === unwGraphHistory.length) {
             setIndex(0)
             setUnwGraphHistory(algoMap[algo](unwGraph))
         }
