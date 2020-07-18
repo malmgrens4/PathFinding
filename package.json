@@ -10,7 +10,7 @@
     "@types/react-resize-detector": "^4.2.0",
     "@types/redux": "^3.6.0",
     "@types/styled-components": "^4.4.0",
-    "lodash": "^4.17.15",
+    "lodash": "^4.17.19",
     "react": "^16.11.0",
     "react-collapsible": "^2.6.2",
     "react-dom": "^16.11.0",
